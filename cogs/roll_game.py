@@ -3,40 +3,43 @@ from discord.ext import commands
 from BB_game import Game_message, Game
 
 
-class example_game_cog(
+class roll_game_cog(
     commands.Cog):  # Cog object Use this for discord interactions for instance user input starting game
     def __init__(self, client):
         self.client = client
         self.game = None
 
     @commands.command()
-    async def example_roll_game(self, ctx):  # Initial command used for Signing up
+    async def roll_game(self, ctx):  # Initial command used for Signing up
         if self.game is None:
-            embed = discord.Embed(title="BB Game | Roll Game", description="Sub description")
+            embed = discord.Embed(color=0x00ff59, title="BB Game | Roll Game", description="Click ✅ to sign up and 👌 to start the game!")
             msg = await ctx.send(embed=embed)
             self.game = roll_game(cog=self, g_message=roll_message(msg))
-            await msg.add_reaction("✔")
+            await msg.add_reaction("✅")
             await msg.add_reaction("👌")
-
-    @commands.command()
-    async def example_start_roll_game(self, ctx):  # Force start command
-        pass
+            await msg.add_reaction("✖")
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):  # Player input command
         if self.game is not None and not payload.member.bot:
-            if not self.game.started and str(payload.emoji) == "✔":
+            if not self.game.started and str(payload.emoji) == "✅":
                 user = await self.client.fetch_user(payload.user_id)
                 await self.game.signup_player(payload.user_id, start_state={f'name': user.name})
 
         if self.game is not None and not payload.member.bot:
             if not self.game.started and str(payload.emoji) == "👌" and payload.user_id in self.game.players:
+                if self.game.sign_up_count() < 2:
+                    return
                 await self.game.reset_players()
                 await self.game.start_game()
-
-        if self.game is not None and not payload.member.bot:
-            if self.game.started and str(payload.emoji) == "🎲" and payload.user_id in self.game.players:
+                
+            elif self.game.started and str(payload.emoji) == "🎲" and payload.user_id in self.game.players:
                 await self.game.player_input(payload.user_id)
+            
+            elif not self.game.started and str(payload.emoji) == "✖" and payload.user_id in self.game.players:
+                print("aa")
+                await self.game.clear_reactions()
+                self.game = None
 
 
 class roll_game(Game):
@@ -54,6 +57,12 @@ class roll_game(Game):
             if not self.players[player]["rolled"]:
                 return False
         return True
+        
+    def sign_up_count(self):
+        return len(self.players)
+        
+    async def clear_reactions(self):
+        await self.g_message.message.clear_reactions()
 
     async def reset_players(self):
         for player in self.players:
@@ -81,11 +90,10 @@ class roll_game(Game):
             await asyncio.sleep(5)
 
             if len(eliminated) > 1:
-                self.round_msg = f"OMG TIE WHAT!?!??"
+                self.round_msg = f"{', '.join(eliminated)} tied with {lowest}!"
 
             else:
-                print("Eliminate logic")
-                self.round_msg = f"{self.players[eliminated[0]]['name']} Was eliminated"
+                self.round_msg = f"{self.players[eliminated[0]]['name']} was eliminated with {lowest}!"
                 del self.players[eliminated[0]]
 
             if len(self.players) < 2:
@@ -101,7 +109,7 @@ class roll_message(Game_message):
         super().__init__(discord_message, discord_client)
 
     async def on_signup_player(self, game, response):
-        embed = discord.Embed(title="BB Game | Roll Game", description="Sub description")
+        embed = discord.Embed(color=0x00ff59, title="BB Game | Roll Game", description="Click ✅ to sign up and 👌 to start the game!")
         for player in game.players:
             embed.add_field(name=game.players[player]['name'], value="Signed up")
         await self.message.edit(embed=embed)
@@ -125,4 +133,4 @@ class roll_message(Game_message):
 
 
 def setup(client):  # Cog stuff will be called From main
-    client.add_cog(example_game_cog(client))
+    client.add_cog(roll_game_cog(client))
