@@ -4,7 +4,9 @@ developed for fun code is never final if you find any ways of improving it feel 
 
 useful links
 	https://github.com/Renondedju/Osu.py/blob/master/docs/index.md
+	
 	https://www.sqlitetutorial.net/sqlite-cheat-sheet/
+	
 	https://sqlitebrowser.org/
 	
 	
