@@ -18,10 +18,6 @@ class roll_game_cog(
             await msg.add_reaction("✔")
             await msg.add_reaction("👌")
 
-    @commands.command()
-    async def start_roll_game(self, ctx):  # Force start command
-        pass
-
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):  # Player input command
         if self.game is not None and not payload.member.bot:
