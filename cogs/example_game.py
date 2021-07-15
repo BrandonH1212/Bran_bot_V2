@@ -10,7 +10,7 @@ class example_game_cog(
         self.game = None
 
     @commands.command()
-    async def roll_game(self, ctx):  # Initial command used for Signing up
+    async def example_roll_game(self, ctx):  # Initial command used for Signing up
         if self.game is None:
             embed = discord.Embed(title="BB Game | Roll Game", description="Sub description")
             msg = await ctx.send(embed=embed)
