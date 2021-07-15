@@ -90,10 +90,10 @@ class roll_game(Game):
             await asyncio.sleep(5)
 
             if len(eliminated) > 1:
-                self.round_msg = f"OMG TIE WHAT!?!??"
+                self.round_msg = f"{', '.join(eliminated)} tied with {lowest}!"
 
             else:
-                self.round_msg = f"{self.players[eliminated[0]]['name']} was eliminated!"
+                self.round_msg = f"{self.players[eliminated[0]]['name']} was eliminated with {lowest}!"
                 del self.players[eliminated[0]]
 
             if len(self.players) < 2:
