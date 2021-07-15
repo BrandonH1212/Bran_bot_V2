@@ -56,7 +56,7 @@ class br_game(commands.Cog):
                     await self.game.player_input(discord_ID=payload.member.id)
                 else:
                     pass
-
+                  
             if self.game.started and str(payload.emoji) == "✅":
                 if payload.member.id in self.game.players:
                     self.game.players[payload.member.id]["skip"] = True
@@ -72,7 +72,6 @@ class br_game(commands.Cog):
             if not self.game.started and str(payload.emoji) == "✖" and payload.user_id in self.game.players:
                 await self.game.clear_reactions()
                 self.game = None
-                
 
 class game_br(Game):
     def __init__(self, max_players=5, loop_interval=15, g_message=Game_message(),
@@ -215,7 +214,6 @@ class br_message(Game_message):
                     embed.add_field(name=f"{game.players[player]['name']} {skip_emoji}", value="Waiting for submission...", inline=True)
             else:
                 embed.add_field(name=f"{game.players[player]['name']}", value=f"Score: {game.players[player]['score']}", inline=True)
-                
         await self.message.edit(embed=embed)
 
     async def on_end_game(self, game):
