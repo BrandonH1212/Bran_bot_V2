@@ -24,6 +24,9 @@ class br_game(commands.Cog):
                 for player in self.game.players:
                     embed.add_field(name=f"{self.game.players[player]['name']}", value="Signed up", inline=True)
                 await msg.edit(embed=embed)
+                
+            else:
+                return
 
     @commands.command()
     async def play_br(self, ctx, star=4, step=0.4):
@@ -194,10 +197,13 @@ class br_message(Game_message):
 
     async def on_game_loop(self, game):
         b_map = game.active_map
-        embed = discord.Embed(title=f"{b_map.title} [{b_map.version}]", url=f"https://osu.ppy.sh/b/{b_map.beatmap_id}/", description=f"`Check play 🔄`  | `Finished Playing  ✅` | [beatconnect](https://beatconnect.io/b/{b_map.beatmapset_id}/) \n⭐ {round(b_map.difficultyrating,2)} | Length: {int(b_map.hit_length//60)}:{int(b_map.hit_length%60)} | BPM: {int(b_map.bpm)}\n{game.round_message}")
+        embed = discord.Embed(title=f"{b_map.artist} - {b_map.title} [{b_map.version}]",
+                              url=f"https://osu.ppy.sh/b/{b_map.beatmap_id}/",
+                              description=f"Refresh play 🔄 | Finished Playing  ✅\n[beatconnect](https://beatconnect.io/b/{b_map.beatmapset_id}/)\n{round(b_map.difficultyrating, 2)}⭐ | Length: {convert_time(b_map.hit_length)} | BPM: {b_map.bpm} | CS{b_map.diff_size} AR{b_map.diff_approach} OD{b_map.diff_overall} HP{b_map.diff_drain}\n{game.round_message}")
         embed.set_author(name=f"osu! Battle Royale! | Time remaining: {convert_time(game.time_out)}")
         embed.set_image(url=f"https://assets.ppy.sh/beatmaps/{b_map.beatmapset_id}/covers/cover.jpg")
-
+        embed.set_footer(text=f"Beatmap ID: {b_map.beatmap_id} | Set ID: {b_map.beatmapset_id}")
+        
         for player in game.players:
             if not game.round_over:
                 skip_emoji = ''
@@ -209,8 +215,7 @@ class br_message(Game_message):
                     embed.add_field(name=f"{game.players[player]['name']} {skip_emoji}", value="Waiting for submission...", inline=True)
             else:
                 embed.add_field(name=f"{game.players[player]['name']}", value=f"Score: {game.players[player]['score']}", inline=True)
-
-        embed.set_footer(text=f"Map_id: {b_map.beatmap_id} | Set_id: {b_map.beatmapset_id}")
+                
         await self.message.edit(embed=embed)
 
     async def on_end_game(self, game):
