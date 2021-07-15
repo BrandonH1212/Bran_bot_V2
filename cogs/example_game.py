@@ -120,7 +120,7 @@ class roll_message(Game_message):
     async def on_end_game(self, game):
         player_id = list(game.players)[0]
         embed = discord.Embed(title="BB Game | Roll Game",
-                              description=f"{game.players[player_id]['name']} WINDS the game with a `{game.players[player_id]['roll']}`")
+                              description=f"{game.players[player_id]['name']} won the game with a `{game.players[player_id]['roll']}`!")
         await self.message.edit(embed=embed)
 
 
