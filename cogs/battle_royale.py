@@ -12,37 +12,31 @@ class br_game(commands.Cog):
         self.db = BB_db.db
         self.api = BB_db.api
 
-    async def start_loop(self, time, msg):
-        time = time
-        while time > 0 and not self.game.started:
-            await asyncio.sleep(5)
-            time -= 5
+    async def start_loop(self, msg):
+        while self.game is not None:
+            if not self.game.started:
+                await asyncio.sleep(3)
 
-            embed = discord.Embed(title=f"BB GAME | OSU Battle Royale | Starts in {convert_time(time)} \n`Use ☠ to sign up`",
-                                  description="Players will fight on osu maps until there is only one remaining",
-                                  color=0x00ff59)
+                embed = discord.Embed(title="BB GAME | osu! Battle Royale \nUse ☠ to sign up and 👌 to start the game!",
+                                      description="Players will fight on osu maps until there is only one remaining",
+                                      color=0x00ff59)
 
-            for player in self.game.players:
-                embed.add_field(name=f"{self.game.players[player]['name']}", value="Signed up", inline=True)
-            await msg.edit(embed=embed)
-
-        if len(self.game.players) > 1:
-            await self.game.start_game()
-        else:
-            await msg.edit(content="Not enough players....Game Canceled :(", embed=None)
-            self.game = None
-            await msg.clear_reactions()
+                for player in self.game.players:
+                    embed.add_field(name=f"{self.game.players[player]['name']}", value="Signed up", inline=True)
+                await msg.edit(embed=embed)
 
     @commands.command()
-    async def play_br(self, ctx, time=60, star=4, step=0.4):
+    async def play_br(self, ctx, star=4, step=0.4):
         if self.game is None:
-            embed = discord.Embed(title="BB GAME | OSU Battle Royale \n`Use ☠ to sign up`",
+            embed = discord.Embed(title="BB GAME | osu! Battle Royale \nUse ☠ to sign up and 👌 to start the game!",
                                   description="Players will fight on osu maps until there is only one remaining",
                                   color=0x00ff59)
             msg = await ctx.send(embed=embed)
             await msg.add_reaction("☠")
+            await msg.add_reaction("👌")
+            await msg.add_reaction("✖")
             self.game = game_br(g_message=br_message(discord_client=self.client, discord_message=msg), cog=self, max_players=100, star_start=star, step=step)
-            await self.start_loop(time, msg)
+            await self.start_loop(msg)
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -54,21 +48,28 @@ class br_game(commands.Cog):
                 else:
                     pass
 
-        if self.game is not None and not payload.member.bot:
             if self.game.started and str(payload.emoji) == "🔄":
                 if await self.db.get_player(payload.member.id) is not None:
                     await self.game.player_input(discord_ID=payload.member.id)
                 else:
                     pass
 
-        if self.game is not None and not payload.member.bot:
             if self.game.started and str(payload.emoji) == "✅":
                 if payload.member.id in self.game.players:
                     self.game.players[payload.member.id]["skip"] = True
                     print("hype")
                 else:
                     pass
-
+                    
+            if not self.game.started and str(payload.emoji) == "👌" and payload.user_id in self.game.players:
+                if len(self.game.players) < 2:
+                    return
+                await self.game.start_game()
+            
+            if not self.game.started and str(payload.emoji) == "✖" and payload.user_id in self.game.players:
+                await self.game.clear_reactions()
+                self.game = None
+                
 
 class game_br(Game):
     def __init__(self, max_players=5, loop_interval=15, g_message=Game_message(),
@@ -182,6 +183,9 @@ class game_br(Game):
 
                 await self.new_round()
                 return False
+                
+    async def clear_reactions(self):
+        await self.g_message.message.clear_reactions()
 
 
 class br_message(Game_message):
@@ -191,7 +195,7 @@ class br_message(Game_message):
     async def on_game_loop(self, game):
         b_map = game.active_map
         embed = discord.Embed(title=f"{b_map.title} [{b_map.version}]", url=f"https://osu.ppy.sh/b/{b_map.beatmap_id}/", description=f"`Check play 🔄`  | `Finished Playing  ✅` | [beatconnect](https://beatconnect.io/b/{b_map.beatmapset_id}/) \n⭐ {round(b_map.difficultyrating,2)} | Length: {int(b_map.hit_length//60)}:{int(b_map.hit_length%60)} | BPM: {int(b_map.bpm)}\n{game.round_message}")
-        embed.set_author(name=f"OSU Battle Royale! | Time remaining: {convert_time(game.time_out)}")
+        embed.set_author(name=f"osu! Battle Royale! | Time remaining: {convert_time(game.time_out)}")
         embed.set_image(url=f"https://assets.ppy.sh/beatmaps/{b_map.beatmapset_id}/covers/cover.jpg")
 
         for player in game.players:
