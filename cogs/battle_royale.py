@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord, asyncio
 from BB_game import Game, Game_message
 import random, BB_db
-from BB_utility import simp_num, clamp
+from BB_utility import simp_num, clamp, convert_time
 
 
 class br_game(commands.Cog):
@@ -18,7 +18,7 @@ class br_game(commands.Cog):
             await asyncio.sleep(5)
             time -= 5
 
-            embed = discord.Embed(title=f"BB GAME | OSU Battle Royale | Starts in {int(time//60)}:{int(time%60)} \n`Use ☠ to sign up`",
+            embed = discord.Embed(title=f"BB GAME | OSU Battle Royale | Starts in {convert_time(time)} \n`Use ☠ to sign up`",
                                   description="Players will fight on osu maps until there is only one remaining",
                                   color=0x00ff59)
 
@@ -191,7 +191,7 @@ class br_message(Game_message):
     async def on_game_loop(self, game):
         b_map = game.active_map
         embed = discord.Embed(title=f"{b_map.title} [{b_map.version}]", url=f"https://osu.ppy.sh/b/{b_map.beatmap_id}/", description=f"`Check play 🔄`  | `Finished Playing  ✅` | [beatconnect](https://beatconnect.io/b/{b_map.beatmapset_id}/) \n⭐ {round(b_map.difficultyrating,2)} | Length: {int(b_map.hit_length//60)}:{int(b_map.hit_length%60)} | BPM: {int(b_map.bpm)}\n{game.round_message}")
-        embed.set_author(name=f"OSU Battle Royale! | Time remaining: {int(game.time_out//60)}:{int(game.time_out%60)}")
+        embed.set_author(name=f"OSU Battle Royale! | Time remaining: {convert_time(game.time_out)}")
         embed.set_image(url=f"https://assets.ppy.sh/beatmaps/{b_map.beatmapset_id}/covers/cover.jpg")
 
         for player in game.players:
