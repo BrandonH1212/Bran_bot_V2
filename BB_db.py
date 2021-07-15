@@ -204,7 +204,11 @@ class Database:  # Main object I use for getting information and updating inform
         return False, None
 
 
-    async def get_maps(self, star_r=[0, 10], len_r=[0, 10000], mode=0, approved=1, limit=1): # Query the database for X number of random maps
+    async def get_maps(self, star_r=None, len_r=None, mode=0, approved=1, limit=1): # Query the database for X number of random maps
+        if len_r is None:
+            len_r = [0, 10000]
+        if star_r is None:
+            star_r = [0, 10]
         cur = self.sql.cursor()
         return_maps = []  # Do the search first then order by random
         q_maps = cur.execute("""
@@ -281,21 +285,20 @@ class Beatmap():  # This object mimics The same object from the osu API I'm usin
         # sql data
         self.beatmapset_id = sql[0]
         self.beatmap_id = sql[1]
-        self.version = sql[2]  # difficulty name
+        self.version = sql[2]           # difficulty name
         self.difficultyrating = sql[3]  # The amount of stars the map would have ingame and on the website
-        self.diff_size = sql[4]  # Circle size value  (CS)
-        self.diff_overall = sql[5]  # Overall difficulty (OD)
-        self.diff_approach = sql[6]  # Approach Rate      (AR)
-        self.diff_drain = sql[7]  # Healthdrain        (HP)
-        self.total_length = sql[8]  # seconds from first note to last note including breaks
+        self.diff_size = sql[4]         # Circle size value  (CS)
+        self.diff_overall = sql[5]      # Overall difficulty (OD)
+        self.diff_approach = sql[6]     # Approach Rate      (AR)
+        self.diff_drain = sql[7]        # Healthdrain        (HP)
+        self.total_length = sql[8]      # seconds from first note to last note including breaks
         self.hit_length = sql[8]
-        self.mode = sql[9]  # game mode, Osu = 0  Taiko = 1 Catch = 2 Mania = 3
-        self.max_combo = sql[10]  # The maximum combo a user can reach playing this beatmap
+        self.mode = sql[9]              # game mode, Osu = 0  Taiko = 1 Catch = 2 Mania = 3
+        self.max_combo = sql[10]        # The maximum combo a user can reach playing this beatmap
         self.artist = sql[12]
-        self.title = sql[13]  # song name
-        self.tags = sql[14]  # song tags
-        self.approved = sql[
-            15]  # Map state Graveyard = -2  WIP = -1 Pending = 0 Ranked = 1 Approved  = 2 Qualified = 3 Loved = 4
+        self.title = sql[13]            # song name
+        self.tags = sql[14]             # song tags
+        self.approved = sql[15]         # Map state Graveyard = -2  WIP = -1 Pending = 0 Ranked = 1 Approved  = 2 Qualified = 3 Loved = 4
         self.bpm = sql[16]
         self.map_url = f"https://osu.ppy.sh/b/{self.beatmap_id}/"
         self.img_url = f"https://assets.ppy.sh/beatmaps/{self.beatmapset_id}/covers/cover.jpg"
@@ -305,8 +308,7 @@ class Beatmap():  # This object mimics The same object from the osu API I'm usin
 
 
 async def main():   # Run this file directly to help test/Play around with stuff
-    db, api = initialize_database()
-    print(await db.get_maps_by_query())
+    pass
 
 
 if __name__ == '__main__':
