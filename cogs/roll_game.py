@@ -31,6 +31,8 @@ class roll_game_cog(
 
         if self.game is not None and not payload.member.bot:
             if not self.game.started and str(payload.emoji) == "👌" and payload.user_id in self.game.players:
+                if self.game.sign_up_count() < 2:
+                    return
                 await self.game.reset_players()
                 await self.game.start_game()
 
@@ -54,6 +56,9 @@ class roll_game(Game):
             if not self.players[player]["rolled"]:
                 return False
         return True
+        
+    def sign_up_count(self):
+        return len(self.players)
 
     async def reset_players(self):
         for player in self.players:
@@ -84,7 +89,6 @@ class roll_game(Game):
                 self.round_msg = f"OMG TIE WHAT!?!??"
 
             else:
-                print("Eliminate logic")
                 self.round_msg = f"{self.players[eliminated[0]]['name']} Was eliminated"
                 del self.players[eliminated[0]]
 
@@ -125,4 +129,4 @@ class roll_message(Game_message):
 
 
 def setup(client):  # Cog stuff will be called From main
-    client.add_cog(example_game_cog(client))
+    client.add_cog(roll_game_cog(client))
