@@ -19,7 +19,7 @@ class example_game_cog(
             await msg.add_reaction("👌")
 
     @commands.command()
-    async def start_roll_game(self, ctx):  # Force start command
+    async def example_start_roll_game(self, ctx):  # Force start command
         pass
 
     @commands.Cog.listener()
