@@ -1,7 +1,7 @@
 import BB_db
 import discord, random, requests, os, time
 from discord.ext import commands, tasks
-from BB_keys import TestKey, liveKey
+from BB_keys import liveKey
 
 version = "Initial git 0.1"                 # Updated with major changes
 client = commands.Bot(command_prefix='!')
