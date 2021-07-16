@@ -137,10 +137,19 @@ def convert_time(time_in_seconds):
     if len(seconds) == 1:
         seconds = "0" + seconds
     return f"{negative*'-'}{minutes}:{seconds}"
+    
+    
+def convert_big_number(big_number):
+    string_number = str(int(big_number))[::-1]
+    new_number = ""
+    for i, number in enumerate(string_number):
+        if i%3 == 0:
+            new_number += ","
+        new_number += number
+    return new_number[:0:-1] #magic
+        
 
 
 if __name__ == '__main__':  # Use for testing stuff by running this file directly
-    dick = {'lol1':1, "lol2":2}
-    keys = dick.keys()
-    print(keys)
+    print(convert_big_number(1234567890))
 

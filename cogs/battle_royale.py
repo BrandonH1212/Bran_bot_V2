@@ -139,7 +139,6 @@ class game_br(Game):
         if skip:
             self.time_out = 0
 
-
         if len(self.players) < 2:
             self.round_message = "Game over"
             return True
@@ -159,7 +158,7 @@ class game_br(Game):
                         eliminated.append(player)
 
                 if len(eliminated) > 0:  # Eliminate players that didn't submit
-                    self.round_message = f"{eliminated} Did not submit and got eliminated!"
+                    self.round_message = f"{eliminated} did not submit and got eliminated!"
                     self.round_results.append(f"{self.players[player]['name']} eliminated on {self.active_map.title}")
 
                 else:
@@ -168,7 +167,7 @@ class game_br(Game):
 
                     for player in self.players:
                         if self.players[player]["score"] == lowest:
-                            self.round_message = f"A tie was detected quick panic!"
+                            self.round_message = f"A tie was detected! No one is eliminated!"
                             await self.new_round()
                             return False
 
@@ -176,7 +175,7 @@ class game_br(Game):
                             eliminated = [player]
                             lowest = self.players[player]["score"]
                             self.round_results.append(f"{self.players[player]['name']} eliminated on {self.active_map.title}")
-                            self.round_message = f'{self.players[player]["name"]} Was eliminated'
+                            self.round_message = f'{self.players[player]["name"]} was eliminated!'
 
 
                 for player in eliminated:
@@ -197,7 +196,10 @@ class br_message(Game_message):
         b_map = game.active_map
         embed = discord.Embed(title=f"{b_map.artist} - {b_map.title} [{b_map.version}]",
                               url=f"https://osu.ppy.sh/b/{b_map.beatmap_id}/",
-                              description=f"Refresh play 🔄 | Finished Playing  ✅\n[beatconnect](https://beatconnect.io/b/{b_map.beatmapset_id}/)\n{round(b_map.star_rating, 2)}⭐ | Length: {convert_time(b_map.length)} | BPM: {b_map.bpm} | CS{b_map.cs} AR{b_map.ar} OD{b_map.od} HP{b_map.hp}\n{game.round_message}")
+                              description=f"Refresh play 🔄 | Finished Playing  ✅\n"
+                                          f"[beatconnect](https://beatconnect.io/b/{b_map.beatmapset_id}/)\n"
+                                          f"{round(b_map.star_rating, 2)}⭐ | Length: {convert_time(b_map.length)} | BPM: {b_map.bpm}"
+                                          f" | CS{b_map.cs} AR{b_map.ar} OD{b_map.od} HP{b_map.hp}\n{game.round_message}")
         embed.set_author(name=f"osu! Battle Royale! | Time remaining: {convert_time(game.time_out)}")
         embed.set_image(url=f"https://assets.ppy.sh/beatmaps/{b_map.beatmapset_id}/covers/cover.jpg")
         embed.set_footer(text=f"Beatmap ID: {b_map.beatmap_id} | Set ID: {b_map.beatmapset_id}")
@@ -212,20 +214,17 @@ class br_message(Game_message):
                 else:
                     embed.add_field(name=f"{game.players[player]['name']} {skip_emoji}", value="Waiting for submission...", inline=True)
             else:
-                embed.add_field(name=f"{game.players[player]['name']}", value=f"Score: {game.players[player]['score']}", inline=True)
+                embed.add_field(name=f"{game.players[player]['name']}", value=f"Score: {convert_big_number(game.players[player]['score'])}", inline=True)
         await self.message.edit(embed=embed)
 
     async def on_end_game(self, game):
         b_map = game.active_map
         player_id = list(game.players)[0]
-        description = "Placements!\n"
+        embed = discord.Embed(title=f"osu! Battle Royale! | Game Over", description="Placements")
         for i, place in enumerate(game.round_results):
-            description += f"{i+1}\n{place}"
-
-        embed = discord.Embed(title=f"OSU Battle Royale! | Game Over",
-                              description=description)
-        embed.set_author(
-            name=f"Congratulations to the winner!\n{game.players[player_id]['name']}")
+            embed.add_field(title=f"#{i+1}.", description=f"{place}")
+            
+        embed.set_author(name=f"Congratulations to {game.players[player_id]['name']} for winning!")
 
         await self.message.edit(embed=embed)
 
