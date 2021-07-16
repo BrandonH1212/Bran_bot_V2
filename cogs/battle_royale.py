@@ -15,8 +15,6 @@ class br_game(commands.Cog):
     async def start_loop(self, msg):
         while self.game is not None:
             if not self.game.started:
-                await asyncio.sleep(3)
-
                 embed = discord.Embed(title="BB GAME | osu! Battle Royale \nUse ☠ to sign up and 👌 to start the game!",
                                       description="Players will fight on osu maps until there is only one remaining",
                                       color=0x00ff59)
@@ -24,7 +22,8 @@ class br_game(commands.Cog):
                 for player in self.game.players:
                     embed.add_field(name=f"{self.game.players[player]['name']}", value="Signed up", inline=True)
                 await msg.edit(embed=embed)
-                
+
+                await asyncio.sleep(3)
             else:
                 return
 
@@ -56,7 +55,7 @@ class br_game(commands.Cog):
                     await self.game.player_input(discord_ID=payload.member.id)
                 else:
                     pass
-
+                  
             if self.game.started and str(payload.emoji) == "✅":
                 if payload.member.id in self.game.players:
                     self.game.players[payload.member.id]["skip"] = True
@@ -72,7 +71,6 @@ class br_game(commands.Cog):
             if not self.game.started and str(payload.emoji) == "✖" and payload.user_id in self.game.players:
                 await self.game.clear_reactions()
                 self.game = None
-                
 
 class game_br(Game):
     def __init__(self, max_players=5, loop_interval=15, g_message=Game_message(),
@@ -103,9 +101,9 @@ class game_br(Game):
                                                len_r=[85, 270])
         print(map_query)
         self.active_map = map_query[-1]
-        self.time_out = 2 * self.active_map.total_length + max(45, self.active_map.total_length * 0.15)
+        self.time_out = 2 * self.active_map.length + max(45, self.active_map.length * 0.15)
         self.round_over = False
-        self.round = self.active_map.difficultyrating
+        self.round = self.active_map.star_rating
         await self.g_message.message.clear_reactions()
         await self.g_message.message.add_reaction("🔄")
         await self.g_message.message.add_reaction("✅")
@@ -162,7 +160,7 @@ class game_br(Game):
 
                 if len(eliminated) > 0:  # Eliminate players that didn't submit
                     self.round_message = f"{eliminated} Did not submit and got eliminated!"
-                    self.round_results.append(f"{self.players[player]['name']} eliminated on {self.game.active_map.title}")
+                    self.round_results.append(f"{self.players[player]['name']} eliminated on {self.active_map.title}")
 
                 else:
                     # Check and compare players scores
@@ -177,7 +175,7 @@ class game_br(Game):
                         if self.players[player]["score"] < lowest:
                             eliminated = [player]
                             lowest = self.players[player]["score"]
-                            self.round_results.append(f"{self.players[player]['name']} eliminated on {self.game.active_map.title}")
+                            self.round_results.append(f"{self.players[player]['name']} eliminated on {self.active_map.title}")
                             self.round_message = f'{self.players[player]["name"]} Was eliminated'
 
 
@@ -199,7 +197,7 @@ class br_message(Game_message):
         b_map = game.active_map
         embed = discord.Embed(title=f"{b_map.artist} - {b_map.title} [{b_map.version}]",
                               url=f"https://osu.ppy.sh/b/{b_map.beatmap_id}/",
-                              description=f"Refresh play 🔄 | Finished Playing  ✅\n[beatconnect](https://beatconnect.io/b/{b_map.beatmapset_id}/)\n{round(b_map.difficultyrating, 2)}⭐ | Length: {convert_time(b_map.hit_length)} | BPM: {b_map.bpm} | CS{b_map.diff_size} AR{b_map.diff_approach} OD{b_map.diff_overall} HP{b_map.diff_drain}\n{game.round_message}")
+                              description=f"Refresh play 🔄 | Finished Playing  ✅\n[beatconnect](https://beatconnect.io/b/{b_map.beatmapset_id}/)\n{round(b_map.star_rating, 2)}⭐ | Length: {convert_time(b_map.length)} | BPM: {b_map.bpm} | CS{b_map.cs} AR{b_map.ar} OD{b_map.od} HP{b_map.hp}\n{game.round_message}")
         embed.set_author(name=f"osu! Battle Royale! | Time remaining: {convert_time(game.time_out)}")
         embed.set_image(url=f"https://assets.ppy.sh/beatmaps/{b_map.beatmapset_id}/covers/cover.jpg")
         embed.set_footer(text=f"Beatmap ID: {b_map.beatmap_id} | Set ID: {b_map.beatmapset_id}")
@@ -215,7 +213,6 @@ class br_message(Game_message):
                     embed.add_field(name=f"{game.players[player]['name']} {skip_emoji}", value="Waiting for submission...", inline=True)
             else:
                 embed.add_field(name=f"{game.players[player]['name']}", value=f"Score: {game.players[player]['score']}", inline=True)
-                
         await self.message.edit(embed=embed)
 
     async def on_end_game(self, game):

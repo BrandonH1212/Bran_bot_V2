@@ -127,12 +127,13 @@ def parse_id(osuid="1"):        # Parses a osu_map ID Given a URL or just the ID
     
     
 def convert_time(time_in_seconds):
+    time_in_seconds = int(time_in_seconds)
     negative = False
     if time_in_seconds < 0:
         negative = True
         time_in_seconds *= -1
-    minutes = str(time_in_seconds//60)
-    seconds = str(time_in_seconds%60)
+    minutes = str(int(time_in_seconds//60))
+    seconds = str(int(time_in_seconds%60))
     if len(seconds) == 1:
         seconds = "0" + seconds
     return f"{negative*'-'}{minutes}:{seconds}"
