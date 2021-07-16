@@ -285,20 +285,19 @@ class Beatmap():  # This object mimics The same object from the osu API I'm usin
         # sql data
         self.beatmapset_id = sql[0]
         self.beatmap_id = sql[1]
-        self.version = sql[2]           # difficulty name
-        self.difficultyrating = sql[3]  # The amount of stars the map would have ingame and on the website
-        self.diff_size = sql[4]         # Circle size value  (CS)
-        self.diff_overall = sql[5]      # Overall difficulty (OD)
-        self.diff_approach = sql[6]     # Approach Rate      (AR)
-        self.diff_drain = sql[7]        # Healthdrain        (HP)
-        self.total_length = sql[8]      # seconds from first note to last note including breaks
-        self.hit_length = sql[8]
-        self.mode = sql[9]              # game mode, Osu = 0  Taiko = 1 Catch = 2 Mania = 3
-        self.max_combo = sql[10]        # The maximum combo a user can reach playing this beatmap
+        self.version = sql[2]               # Difficulty name
+        self.star_rating = sql[3]
+        self.cs = sql[4]                    # Circle size (CS)
+        self.od = sql[5]                    # Overall difficulty (OD)
+        self.ar = sql[6]                    # Approach Rate (AR)
+        self.hp = sql[7]                    # Health drain (HP)
+        self.length = sql[8]                # Seconds from first note to last note including breaks
+        self.mode = sql[9]                  # Game mode, Osu = 0  Taiko = 1 Catch = 2 Mania = 3
+        self.max_combo = sql[10]
         self.artist = sql[12]
-        self.title = sql[13]            # song name
-        self.tags = sql[14]             # song tags
-        self.approved = sql[15]         # Map state Graveyard = -2  WIP = -1 Pending = 0 Ranked = 1 Approved  = 2 Qualified = 3 Loved = 4
+        self.title = sql[13]                # Song name
+        self.tags = sql[14]
+        self.status = sql[15]              # Map status Graveyard = -2  WIP = -1 Pending = 0 Ranked = 1 Approved  = 2 Qualified = 3 Loved = 4
         self.bpm = sql[16]
         self.map_url = f"https://osu.ppy.sh/b/{self.beatmap_id}/"
         self.img_url = f"https://assets.ppy.sh/beatmaps/{self.beatmapset_id}/covers/cover.jpg"
