@@ -18,7 +18,7 @@ class register_cog(commands.Cog):
         if len(osu_name) < 1:
             await ctx.send(f"Use `!link [osu_name]` to link your osu account")
             return
-        elif len(osu_name) >= 15:
+        elif len(osu_name) > 15:
             await ctx.send(f"Name too long")
             return
 
