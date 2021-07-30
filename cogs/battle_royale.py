@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord, asyncio
 from BB_game import Game, Game_message
 import random, BB_db
-from BB_utility import simp_num, clamp, convert_time
+from BB_utility import simp_num, clamp, convert_time, convert_big_number
 
 
 class br_game(commands.Cog):
@@ -11,11 +11,13 @@ class br_game(commands.Cog):
         self.game = None
         self.db = BB_db.db
         self.api = BB_db.api
+        self.host = None
+        self.host_name = None
 
     async def start_loop(self, msg):
         while self.game is not None:
             if not self.game.started:
-                embed = discord.Embed(title="BB GAME | osu! Battle Royale \nUse ☠ to sign up and 👌 to start the game!",
+                embed = discord.Embed(title=f"BB GAME | osu! Battle Royale | Host: {self.host_name}\nUse `☠` to sign up, host use`👌` to start the game!",
                                       description="Players will fight on osu maps until there is only one remaining",
                                       color=0x00ff59)
 
@@ -30,7 +32,7 @@ class br_game(commands.Cog):
     @commands.command()
     async def play_br(self, ctx, star=4, step=0.4):
         if self.game is None:
-            embed = discord.Embed(title="BB GAME | osu! Battle Royale \nUse ☠ to sign up and 👌 to start the game!",
+            embed = discord.Embed(title="BB GAME | osu! Battle Royale \nUse `☠` to sign up and `👌` to start the game!",
                                   description="Players will fight on osu maps until there is only one remaining",
                                   color=0x00ff59)
             msg = await ctx.send(embed=embed)
@@ -38,6 +40,9 @@ class br_game(commands.Cog):
             await msg.add_reaction("👌")
             await msg.add_reaction("✖")
             self.game = game_br(g_message=br_message(discord_client=self.client, discord_message=msg), cog=self, max_players=100, star_start=star, step=step)
+            user = await self.client.fetch_user(ctx.author.id)
+            self.host = user.id
+            self.host_name = user.name
             await self.start_loop(msg)
 
     @commands.Cog.listener()
@@ -63,12 +68,12 @@ class br_game(commands.Cog):
                 else:
                     pass
                     
-            if not self.game.started and str(payload.emoji) == "👌" and payload.user_id in self.game.players:
+            if not self.game.started and str(payload.emoji) == "👌" and payload.member.id == self.host:
                 if len(self.game.players) < 2:
                     return
                 await self.game.start_game()
             
-            if not self.game.started and str(payload.emoji) == "✖" and payload.user_id in self.game.players:
+            if not self.game.started and str(payload.emoji) == "✖" and payload.member.id == self.host:
                 await self.game.clear_reactions()
                 self.game = None
 
@@ -158,7 +163,7 @@ class game_br(Game):
                         eliminated.append(player)
 
                 if len(eliminated) > 0:  # Eliminate players that didn't submit
-                    self.round_message = f"{eliminated} did not submit and got eliminated!"
+                    self.round_message = f"{self.players[player]['name']} did not submit and got eliminated!"
                     self.round_results.append(f"{self.players[player]['name']} eliminated on {self.active_map.title}")
 
                 else:
@@ -196,9 +201,9 @@ class br_message(Game_message):
         b_map = game.active_map
         embed = discord.Embed(title=f"{b_map.artist} - {b_map.title} [{b_map.version}]",
                               url=f"https://osu.ppy.sh/b/{b_map.beatmap_id}/",
-                              description=f"Refresh play 🔄 | Finished Playing  ✅\n"
+                              description=f"Refresh play `🔄` | Finished Playing  `✅`\n"
                                           f"[beatconnect](https://beatconnect.io/b/{b_map.beatmapset_id}/)\n"
-                                          f"{round(b_map.star_rating, 2)}⭐ | Length: {convert_time(b_map.length)} | BPM: {b_map.bpm}"
+                                          f"{round(b_map.star_rating, 2)}★ | Length: {convert_time(b_map.length)} | BPM: {b_map.bpm}"
                                           f" | CS{b_map.cs} AR{b_map.ar} OD{b_map.od} HP{b_map.hp}\n{game.round_message}")
         embed.set_author(name=f"osu! Battle Royale! | Time remaining: {convert_time(game.time_out)}")
         embed.set_image(url=f"https://assets.ppy.sh/beatmaps/{b_map.beatmapset_id}/covers/cover.jpg")
@@ -222,7 +227,7 @@ class br_message(Game_message):
         player_id = list(game.players)[0]
         embed = discord.Embed(title=f"osu! Battle Royale! | Game Over", description="Placements")
         for i, place in enumerate(game.round_results):
-            embed.add_field(title=f"#{i+1}.", description=f"{place}")
+            embed.add_field(name=f"#{i+1}.", value=f"{place}")
             
         embed.set_author(name=f"Congratulations to {game.players[player_id]['name']} for winning!")
 
