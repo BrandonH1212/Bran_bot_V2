@@ -1,6 +1,7 @@
 import discord, random, asyncio
 from discord.ext import commands
 from BB_game import Game_message, Game
+from BB_utility import convert_big_number
 
 
 class death_roll_game_cog(
@@ -12,11 +13,11 @@ class death_roll_game_cog(
         self.host_name = None
 
     @commands.command()
-    async def death_roll_game(self, ctx):  # Initial command used for Signing up
+    async def death_roll_game(self, ctx, rolls=1000):  # Initial command used for Signing up
         if self.game is None:
             embed = discord.Embed(color=0x00ff59, title="BB Game | Death Death Roll Game", description="Click ✅ to sign up and 👌 to start the game!")
             msg = await ctx.send(embed=embed)
-            self.game = death_roll_game(cog=self, g_message=roll_message(msg))
+            self.game = death_roll_game(cog=self, g_message=roll_message(msg), starting_roll=rolls)
             user = await self.client.fetch_user(ctx.author.id)
             self.host = user.id
             self.host_name = user.name
@@ -46,10 +47,11 @@ class death_roll_game_cog(
 
 
 class death_roll_game(Game):
-    def __init__(self, max_players=10, loop_interval=5, g_message=None,
-                 payer_state={"name": "", "roll": 0}, time_out=500, cog=None):
+    def __init__(self, max_players=10, loop_interval=4, g_message=None,
+                 payer_state={"name": "", "roll": 0}, time_out=500, cog=None, starting_roll=1000):
         super().__init__(max_players, loop_interval, g_message, payer_state, time_out, cog)
-        self.last_roll = 1000000
+        self.starting_roll = starting_roll
+        self.last_roll = starting_roll
         self.current_player = 0
         self.roll_happened = False
 
@@ -78,7 +80,7 @@ class death_roll_game(Game):
                 self.round_msg = f"{self.players[self.get_current_player_id()]['name']} Rolled 1 and was eliminated"
                 del self.players[self.get_current_player_id()]
                 self.roll_happened = False
-                self.last_roll = 1000000
+                self.last_roll = self.starting_roll
                 self.current_player = 0
             else:
                 self.round_msg = f"{self.players[self.get_current_player_id()]['name']} Is safe :O"
@@ -95,7 +97,6 @@ class death_roll_game(Game):
             await self.g_message.message.clear_reactions()
             await self.g_message.message.add_reaction("🎲")
 
-        await self.g_message.on_game_loop(self)
         return False
 
 
@@ -111,13 +112,13 @@ class roll_message(Game_message):
         await self.message.edit(embed=embed)
 
     async def on_game_loop(self, game):
-        embed = discord.Embed(title=f"BB Game | Death Roll Game | Now Rolling 1-{game.last_roll}", description=f'First one to 1 loses \n{game.round_msg}')
+        embed = discord.Embed(title=f"BB Game | Death Roll Game | Now Rolling 1-{convert_big_number(game.last_roll)}", description=f'First one to 1 loses \n{game.round_msg}')
 
         for player in game.players:
             if game.get_current_player_id() == player:
                 embed.add_field(name=game.players[player]['name'], value=">> 🎲 <<")
             else:
-                embed.add_field(name=game.players[player]['name'], value=f'Rolled {game.players[player]["roll"]}')
+                embed.add_field(name=game.players[player]['name'], value=f'Rolled {convert_big_number(game.players[player]["roll"])}')
         await self.message.edit(embed=embed)
 
     async def on_end_game(self, game):
