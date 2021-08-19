@@ -77,6 +77,7 @@ class br_game(commands.Cog):
                 await self.game.clear_reactions()
                 self.game = None
 
+
 class game_br(Game):
     def __init__(self, max_players=5, loop_interval=15, g_message=Game_message(),
                  game_vars={"submitted": False, "score": 0, "name": "", "last_check": 0, "sub_num": 0, "skip": False}, time_out=500, cog=None, star_start=4, step=0.4):
