@@ -77,11 +77,11 @@ class death_roll_game(Game):
     async def check_end(self):
         if self.roll_happened:
             if self.last_roll == 1:
-                self.round_msg = f"{self.players[self.get_current_player_id()]['name']} Rolled 1 and was eliminated"
+                self.round_msg = f"{self.players[self.get_current_player_id()]['name']} Rolled 1 and was eliminated..."
                 del self.players[self.get_current_player_id()]
                 self.roll_happened = False
                 self.last_roll = self.starting_roll
-                self.current_player = 0
+                self.current_player = -1
             else:
                 self.round_msg = f"{self.players[self.get_current_player_id()]['name']} Is safe :O"
                 self.roll_happened = False
@@ -124,7 +124,7 @@ class roll_message(Game_message):
     async def on_end_game(self, game):
         player_id = list(game.players)[0]
         embed = discord.Embed(title="BB Game | Death Roll Game",
-                              description=f"{game.round_msg} {game.players[player_id]['name']}  wins!")
+                              description=f"{game.round_msg}\n{game.players[player_id]['name']}  wins!")
         await self.message.clear_reactions()
         await self.message.edit(embed=embed)
 

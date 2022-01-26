@@ -147,7 +147,31 @@ def convert_big_number(big_number):
             new_number += ","
         new_number += number
     return new_number[:0:-1] #magic
-        
+
+
+# If the user already has an emoji, it will return it
+# If the user doesn't have an emoji, it will create one
+# Takes discord client and discord user as parameters
+async def get_user_emoji(client, user):
+    from requests import get as r_get
+    emoji_server = 523099434159177729
+    server = await client.fetch_guild(emoji_server)
+    req_emojis = await server.fetch_emojis()
+    e_names = {}
+
+    for i, emojis in enumerate(req_emojis):
+        e_names[str(emojis.name)] = i
+
+    if str(user.id) not in e_names.keys():
+        request = r_get(user.avatar_url)
+        emoji = await server.create_custom_emoji(name=user.id, image=request.content)
+        return emoji
+
+    return req_emojis[e_names[str(user.id)]]
+
+
+
+
 
 
 if __name__ == '__main__':  # Use for testing stuff by running this file directly

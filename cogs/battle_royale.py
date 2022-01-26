@@ -32,7 +32,7 @@ class br_game(commands.Cog):
     @commands.command()
     async def play_br(self, ctx, star=4, step=0.4):
         if self.game is None:
-            embed = discord.Embed(title="BB GAME | osu! Battle Royale \nUse `☠` to sign up and `👌` to start the game!",
+            embed = discord.Embed(title="BB GAME | osu! Battle Royale \nUse ☠ to sign up and 👌 to start the game!",
                                   description="Players will fight on osu maps until there is only one remaining",
                                   color=0x00ff59)
             msg = await ctx.send(embed=embed)

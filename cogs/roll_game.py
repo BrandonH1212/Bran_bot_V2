@@ -1,6 +1,7 @@
 import discord, random, asyncio
 from discord.ext import commands
 from BB_game import Game_message, Game
+from BB_utility import get_user_emoji
 
 
 class roll_game_cog(
@@ -23,7 +24,8 @@ class roll_game_cog(
         if self.game is not None and not payload.member.bot:
             if not self.game.started and str(payload.emoji) == "✅":
                 user = await self.client.fetch_user(payload.user_id)
-                await self.game.signup_player(payload.user_id, start_state={f'name': user.name})
+                emoji = await get_user_emoji(client=self.client ,user=user)
+                await self.game.signup_player(payload.user_id, start_state={f'name': emoji})
 
         if self.game is not None and not payload.member.bot:
             if not self.game.started and str(payload.emoji) == "👌" and payload.user_id in self.game.players:
